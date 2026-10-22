@@ -1,9 +1,43 @@
-<h1>View Index StudentController</h1>
-<form asp-action="Index" method="post">\
-    <input type="text" name="fullName" placeholder="nhập họ tên"/>
-    <input type="text" name="Addres" placeholder="Nhập họ tên"/>
-    <input type="text" name="University" placeholder="Nhập  tên trường"/>
-    <input type="submit" value="Gửi dữu liệu"/>
-    
-</form>
-<h2>@ViewData[index: "Data"]</h2>
+@model IEnumerable<DemoMVC.Models.Student>
+
+@{
+    ViewData["Title"] = "Danh sách sinh viên";
+}
+
+<h1>Danh sách sinh viên</h1>
+
+@if (TempData["Message"] is string message)
+{
+    <div class="alert alert-success" role="alert">@message</div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Thêm sinh viên</a>
+</p>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Mã sinh viên</th>
+            <th>Họ và tên</th>
+            <th>Email</th>
+            <th>Khoa</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var student in Model)
+        {
+            <tr>
+                <td>@student.StudentCode</td>
+                <td>@student.FullName</td>
+                <td>@student.Email</td>
+                <td>@student.Department?.Name</td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@student.StudentCode">Sửa</a> |
+                    <a asp-action="Delete" asp-route-id="@student.StudentCode">Xóa</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,50 @@
+@model DemoMVC.Models.Student
+
+@{
+    ViewData["Title"] = "Sửa thông tin sinh viên";
+}
+
+<h1>Sửa thông tin sinh viên</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Edit" asp-route-id="@Model.StudentCode" method="post">
+            <input asp-for="StudentCode" type="hidden" />
+            <input asp-for="AdmissionYear" type="hidden" />
+            <input asp-for="TrainingSystemCode" type="hidden" />
+            <input asp-for="MajorCode" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label class="form-label">Mã sinh viên</label>
+                <input value="@Model.StudentCode" class="form-control" readonly />
+            </div>
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label">Họ và tên</label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Address" class="form-label">Địa chỉ</label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DepartmentCode" class="form-label">Khoa</label>
+                <select asp-for="DepartmentCode" asp-items="ViewBag.DepartmentCode" class="form-select"></select>
+                <span asp-validation-for="DepartmentCode" class="text-danger"></span>
+            </div>
+            <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+            <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

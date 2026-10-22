@@ -1,0 +1,62 @@
+@model DemoMVC.Models.Student
+
+@{
+    ViewData["Title"] = "Thêm sinh viên";
+}
+
+<h1>Thêm sinh viên</h1>
+<p>Mã sinh viên được tạo tự động theo năm nhập học, hệ đào tạo, mã ngành và số thứ tự.</p>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="mb-3">
+                <label asp-for="FullName" class="form-label">Họ và tên</label>
+                <input asp-for="FullName" class="form-control" />
+                <span asp-validation-for="FullName" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Email" class="form-label">Email</label>
+                <input asp-for="Email" class="form-control" />
+                <span asp-validation-for="Email" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="Address" class="form-label">Địa chỉ</label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="DepartmentCode" class="form-label">Khoa</label>
+                <select asp-for="DepartmentCode" asp-items="ViewBag.DepartmentCode" class="form-select">
+                    <option value="">-- Chọn khoa --</option>
+                </select>
+                <span asp-validation-for="DepartmentCode" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="AdmissionYear" class="form-label">Năm nhập học</label>
+                <input asp-for="AdmissionYear" class="form-control" type="number" min="2000" max="2099" />
+                <span asp-validation-for="AdmissionYear" class="text-danger"></span>
+            </div>
+            <div class="mb-3">
+                <label asp-for="TrainingSystemCode" class="form-label">Mã hệ đào tạo</label>
+                <input asp-for="TrainingSystemCode" class="form-control" inputmode="numeric" maxlength="2" />
+                <span asp-validation-for="TrainingSystemCode" class="text-danger"></span>
+                <div class="form-text">Ví dụ: 21 - Đại học chính quy.</div>
+            </div>
+            <div class="mb-3">
+                <label asp-for="MajorCode" class="form-label">Mã ngành</label>
+                <input asp-for="MajorCode" class="form-control" inputmode="numeric" maxlength="2" />
+                <span asp-validation-for="MajorCode" class="text-danger"></span>
+                <div class="form-text">Ví dụ: 05 - Công nghệ thông tin.</div>
+            </div>
+            <button type="submit" class="btn btn-primary">Thêm sinh viên</button>
+            <a asp-action="Index" class="btn btn-secondary">Quay lại</a>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
