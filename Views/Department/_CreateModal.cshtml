@@ -1,0 +1,25 @@
+@model DemoMVC.Models.Department
+
+<div class="modal-header">
+    <h5 class="modal-title">Thêm khoa</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+</div>
+<form asp-action="Create" method="post" class="crud-modal-form" data-ajax-form>
+    <div class="modal-body">
+        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <div class="mb-3">
+            <label asp-for="DepartmentCode" class="form-label">Mã khoa</label>
+            <input asp-for="DepartmentCode" class="form-control" />
+            <span asp-validation-for="DepartmentCode" class="text-danger"></span>
+        </div>
+        <div class="mb-3">
+            <label asp-for="Name" class="form-label">Tên khoa</label>
+            <input asp-for="Name" class="form-control" />
+            <span asp-validation-for="Name" class="text-danger"></span>
+        </div>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn btn-primary">Thêm khoa</button>
+    </div>
+</form>

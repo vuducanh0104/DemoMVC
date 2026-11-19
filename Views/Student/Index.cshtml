@@ -1,4 +1,4 @@
-@model IEnumerable<DemoMVC.Models.Student>
+@model DemoMVC.ViewModels.PagedListViewModel<DemoMVC.Models.Student>
 
 @{
     ViewData["Title"] = "Danh sách sinh viên";
@@ -10,11 +10,38 @@
 {
     <div class="alert alert-success" role="alert">@message</div>
 }
+@if (TempData["Error"] is string error)
+{
+    <div class="alert alert-danger" role="alert">@error</div>
+}
 
 <p>
-    <a asp-action="Create" class="btn btn-primary">Thêm sinh viên</a>
+    <button type="button" class="btn btn-primary" data-crud-modal
+            data-url="@Url.Action("Create")">Thêm sinh viên</button>
 </p>
 
+<form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-12 col-md-6">
+        <label for="searchString" class="form-label">Tìm kiếm sinh viên</label>
+        <input id="searchString" name="searchString" value="@Model.Pagination.SearchString"
+               class="form-control" placeholder="Mã, họ tên, email, khoa..." />
+    </div>
+    <div class="col-12 col-sm-4 col-md-3">
+        <label for="pageSize" class="form-label">Số bản ghi mỗi trang</label>
+        <select id="pageSize" name="pageSize" class="form-select" onchange="this.form.submit()">
+            @foreach (var size in DemoMVC.Models.PaginationOptions.PageSizes)
+            {
+                <option value="@size" selected="@(size == Model.Pagination.PageSize)">@size</option>
+            }
+        </select>
+    </div>
+    <div class="col-12 col-sm-8 col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Làm mới</a>
+    </div>
+</form>
+
+<div class="table-responsive">
 <table class="table table-striped">
     <thead>
         <tr>
@@ -26,18 +53,42 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var student in Model)
+        @if (Model.Items.Count == 0)
         {
             <tr>
-                <td>@student.StudentCode</td>
-                <td>@student.FullName</td>
-                <td>@student.Email</td>
-                <td>@student.Department?.Name</td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@student.StudentCode">Sửa</a> |
-                    <a asp-action="Delete" asp-route-id="@student.StudentCode">Xóa</a>
-                </td>
+                <td colspan="5" class="text-center text-muted py-4">Không tìm thấy dữ liệu phù hợp</td>
             </tr>
+        }
+        else
+        {
+            @foreach (var student in Model.Items)
+            {
+                <tr>
+                    <td>@student.StudentCode</td>
+                    <td>@student.FullName</td>
+                    <td>@student.Email</td>
+                    <td>@student.Department?.Name</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-crud-modal
+                                data-url="@Url.Action("Edit", new { id = student.StudentCode })">Sửa</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-crud-modal
+                                data-url="@Url.Action("Delete", new { id = student.StudentCode })">Xóa</button>
+                    </td>
+                </tr>
+            }
         }
     </tbody>
 </table>
+</div>
+
+<partial name="_Pagination" model="Model.Pagination" />
+
+<div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content" id="crudModalContent"></div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

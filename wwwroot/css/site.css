@@ -21,6 +21,18 @@ body {
   margin-bottom: 60px;
 }
 
+.crud-modal-form {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.crud-modal-form .modal-body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+}
+
 .form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
   color: var(--bs-secondary-color);
   text-align: end;

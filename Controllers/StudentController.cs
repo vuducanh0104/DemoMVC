@@ -1,5 +1,6 @@
 using DemoMVC.Data;
 using DemoMVC.Models;
+using DemoMVC.ViewModels;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -15,20 +16,74 @@ public class StudentController : Controller
         _context = context;
     }
 
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(
+        string? searchString,
+        int pageNumber = 1,
+        int pageSize = PaginationOptions.DefaultPageSize)
     {
-        var students = await _context.Student
-            .AsNoTracking()
-            .Include(student => student.Department)
-            .OrderBy(student => student.StudentCode)
-            .ToListAsync();
-        return View(students);
+        var normalizedSearch = searchString?.Trim() ?? string.Empty;
+        var query = _context.Student.AsNoTracking();
+
+        if (normalizedSearch.Length > 0)
+        {
+            var searchPattern = SearchPattern.CreateContainsPattern(normalizedSearch);
+            query = query.Where(student =>
+                student.StudentCode.Contains(normalizedSearch) ||
+                EF.Functions.Like(student.StudentCode, searchPattern, SearchPattern.EscapeCharacter) ||
+                student.FullName.Contains(normalizedSearch) ||
+                EF.Functions.Like(student.FullName, searchPattern, SearchPattern.EscapeCharacter) ||
+                student.Email.Contains(normalizedSearch) ||
+                EF.Functions.Like(student.Email, searchPattern, SearchPattern.EscapeCharacter) ||
+                (student.Address != null && student.Address.Contains(normalizedSearch)) ||
+                (student.Address != null &&
+                 EF.Functions.Like(student.Address, searchPattern, SearchPattern.EscapeCharacter)) ||
+                student.AdmissionYear.ToString().Contains(normalizedSearch) ||
+                EF.Functions.Like(
+                    student.AdmissionYear.ToString(),
+                    searchPattern,
+                    SearchPattern.EscapeCharacter) ||
+                student.TrainingSystemCode.Contains(normalizedSearch) ||
+                EF.Functions.Like(student.TrainingSystemCode, searchPattern, SearchPattern.EscapeCharacter) ||
+                student.MajorCode.Contains(normalizedSearch) ||
+                EF.Functions.Like(student.MajorCode, searchPattern, SearchPattern.EscapeCharacter) ||
+                student.DepartmentCode.Contains(normalizedSearch) ||
+                EF.Functions.Like(student.DepartmentCode, searchPattern, SearchPattern.EscapeCharacter) ||
+                (student.Department != null &&
+                 (student.Department.Name.Contains(normalizedSearch) ||
+                  EF.Functions.Like(
+                      student.Department.Name,
+                      searchPattern,
+                      SearchPattern.EscapeCharacter))));
+        }
+
+        var students = await PaginatedList<Student>.CreateAsync(
+            query.Include(student => student.Department)
+                .OrderBy(student => student.StudentCode),
+            pageNumber,
+            pageSize,
+            HttpContext.RequestAborted);
+
+        return View(new PagedListViewModel<Student>
+        {
+            Items = students.Items,
+            Pagination = new PaginationViewModel
+            {
+                SearchString = normalizedSearch,
+                PageNumber = students.PageNumber,
+                PageSize = students.PageSize,
+                TotalCount = students.TotalCount,
+                TotalPages = students.TotalPages
+            }
+        });
     }
 
     public async Task<IActionResult> Create()
     {
         await PopulateDepartmentsAsync();
-        return View(new Student { AdmissionYear = DateTime.Now.Year });
+        var student = new Student { AdmissionYear = DateTime.Now.Year };
+        return IsAjaxRequest()
+            ? PartialView("_CreateModal", student)
+            : View(student);
     }
 
     [HttpPost]
@@ -50,7 +105,9 @@ public class StudentController : Controller
         if (!ModelState.IsValid)
         {
             await PopulateDepartmentsAsync();
-            return View(student);
+            return IsAjaxRequest()
+                ? PartialView("_CreateModal", student)
+                : View(student);
         }
 
         var prefix = $"{student.AdmissionYear % 100:00}" +
@@ -60,6 +117,7 @@ public class StudentController : Controller
             .Select(item => item.StudentCode)
             .ToListAsync();
         var lastSequence = existingCodes
+            .Where(code => code.Length == prefix.Length + 4)
             .Select(code => int.TryParse(code.AsSpan(prefix.Length), out var sequence)
                 ? sequence
                 : 0)
@@ -72,7 +130,9 @@ public class StudentController : Controller
                 string.Empty,
                 $"Mã sinh viên với tiền tố {prefix} đã vượt quá 4 chữ số thứ tự.");
             await PopulateDepartmentsAsync();
-            return View(student);
+            return IsAjaxRequest()
+                ? PartialView("_CreateModal", student)
+                : View(student);
         }
 
         student.StudentCode = $"{prefix}{lastSequence + 1:0000}";
@@ -80,6 +140,11 @@ public class StudentController : Controller
         await _context.SaveChangesAsync();
 
         TempData["Message"] = $"Đã thêm sinh viên với mã {student.StudentCode}.";
+        if (IsAjaxRequest())
+        {
+            return Json(new { success = true });
+        }
+
         return RedirectToAction(nameof(Index));
     }
 
@@ -97,7 +162,9 @@ public class StudentController : Controller
         }
 
         await PopulateDepartmentsAsync();
-        return View(student);
+        return IsAjaxRequest()
+            ? PartialView("_EditModal", student)
+            : View(student);
     }
 
     [HttpPost]
@@ -129,7 +196,9 @@ public class StudentController : Controller
         if (!ModelState.IsValid)
         {
             await PopulateDepartmentsAsync();
-            return View(input);
+            return IsAjaxRequest()
+                ? PartialView("_EditModal", input)
+                : View(input);
         }
 
         student.FullName = input.FullName;
@@ -137,6 +206,12 @@ public class StudentController : Controller
         student.Email = input.Email;
         student.DepartmentCode = input.DepartmentCode;
         await _context.SaveChangesAsync();
+
+        TempData["Message"] = "Đã cập nhật thông tin sinh viên.";
+        if (IsAjaxRequest())
+        {
+            return Json(new { success = true });
+        }
 
         return RedirectToAction(nameof(Index));
     }
@@ -152,7 +227,14 @@ public class StudentController : Controller
             .AsNoTracking()
             .Include(item => item.Department)
             .FirstOrDefaultAsync(item => item.StudentCode == id);
-        return student is null ? NotFound() : View(student);
+        if (student is null)
+        {
+            return NotFound();
+        }
+
+        return IsAjaxRequest()
+            ? PartialView("_DeleteModal", student)
+            : View(student);
     }
 
     [HttpPost, ActionName("Delete")]
@@ -160,10 +242,17 @@ public class StudentController : Controller
     public async Task<IActionResult> DeleteConfirmed(string id)
     {
         var student = await _context.Student.FindAsync(id);
-        if (student is not null)
+        if (student is null)
         {
-            _context.Student.Remove(student);
-            await _context.SaveChangesAsync();
+            return NotFound();
+        }
+
+        _context.Student.Remove(student);
+        await _context.SaveChangesAsync();
+        TempData["Message"] = "Đã xóa sinh viên.";
+        if (IsAjaxRequest())
+        {
+            return Json(new { success = true });
         }
 
         return RedirectToAction(nameof(Index));
@@ -179,4 +268,7 @@ public class StudentController : Controller
             nameof(Department.DepartmentCode),
             nameof(Department.Name));
     }
+
+    private bool IsAjaxRequest() =>
+        string.Equals(Request.Headers["X-Requested-With"], "XMLHttpRequest", StringComparison.Ordinal);
 }

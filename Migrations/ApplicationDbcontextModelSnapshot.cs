@@ -22,17 +22,12 @@ namespace DemoMVC.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("DepartmentCode1")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasMaxLength(150)
                         .HasColumnType("TEXT");
 
                     b.HasKey("DepartmentCode");
-
-                    b.HasIndex("DepartmentCode1");
 
                     b.ToTable("Departments");
 
@@ -113,23 +108,6 @@ namespace DemoMVC.Migrations
                     b.ToTable("Employees");
                 });
 
-            modelBuilder.Entity("DemoMVC.Models.Person", b =>
-                {
-                    b.Property<string>("PersonId")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Address")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("FullName")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("PersonId");
-
-                    b.ToTable("Person");
-                });
-
             modelBuilder.Entity("DemoMVC.Models.Student", b =>
                 {
                     b.Property<string>("StudentCode")
@@ -170,13 +148,6 @@ namespace DemoMVC.Migrations
                     b.ToTable("Student");
                 });
 
-            modelBuilder.Entity("DemoMVC.Models.Department", b =>
-                {
-                    b.HasOne("DemoMVC.Models.Department", null)
-                        .WithMany("Departments")
-                        .HasForeignKey("DepartmentCode1");
-                });
-
             modelBuilder.Entity("DemoMVC.Models.Student", b =>
                 {
                     b.HasOne("DemoMVC.Models.Department", "Department")
@@ -190,8 +161,6 @@ namespace DemoMVC.Migrations
 
             modelBuilder.Entity("DemoMVC.Models.Department", b =>
                 {
-                    b.Navigation("Departments");
-
                     b.Navigation("Students");
                 });
 #pragma warning restore 612, 618

@@ -1,5 +1,4 @@
 using System.ComponentModel.DataAnnotations;
-using Microsoft.EntityFrameworkCore;
 
 namespace DemoMVC.Models;
 
@@ -13,7 +12,5 @@ public class Department
     [StringLength(150)]
     public string Name { get; set; } = string.Empty;
 
-    public ICollection<Student> Students { get; set; } = new List<Student>();  
-    public DbSet<Department> ?Departments { get; set; }
-      }
-
+    public ICollection<Student> Students { get; set; } = new List<Student>();
+}

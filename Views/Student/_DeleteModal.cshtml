@@ -1,0 +1,23 @@
+@model DemoMVC.Models.Student
+
+<div class="modal-header">
+    <h5 class="modal-title">Xóa sinh viên</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+</div>
+<form asp-action="Delete" asp-route-id="@Model.StudentCode" method="post" class="crud-modal-form" data-ajax-form>
+    <div class="modal-body">
+        <p class="text-danger">Bạn có chắc chắn muốn xóa sinh viên này không?</p>
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Mã sinh viên</dt>
+            <dd class="col-sm-9">@Model.StudentCode</dd>
+            <dt class="col-sm-3">Họ và tên</dt>
+            <dd class="col-sm-9">@Model.FullName</dd>
+            <dt class="col-sm-3">Khoa</dt>
+            <dd class="col-sm-9">@Model.Department?.Name</dd>
+        </dl>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Hủy</button>
+        <button type="submit" class="btn btn-danger">Xóa</button>
+    </div>
+</form>

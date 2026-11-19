@@ -1,4 +1,4 @@
-@model IEnumerable<DemoMVC.Models.Department>
+@model DemoMVC.ViewModels.PagedListViewModel<DemoMVC.Models.Department>
 
 @{
     ViewData["Title"] = "Danh sách khoa";
@@ -20,6 +20,28 @@
             data-url="@Url.Action("Create")">Thêm khoa</button>
 </p>
 
+<form asp-action="Index" method="get" class="row g-2 align-items-end mb-3">
+    <div class="col-12 col-md-6">
+        <label for="searchString" class="form-label">Tìm kiếm khoa</label>
+        <input id="searchString" name="searchString" value="@Model.Pagination.SearchString"
+               class="form-control" placeholder="Nhập mã hoặc tên khoa" />
+    </div>
+    <div class="col-12 col-sm-4 col-md-3">
+        <label for="pageSize" class="form-label">Số bản ghi mỗi trang</label>
+        <select id="pageSize" name="pageSize" class="form-select" onchange="this.form.submit()">
+            @foreach (var size in DemoMVC.Models.PaginationOptions.PageSizes)
+            {
+                <option value="@size" selected="@(size == Model.Pagination.PageSize)">@size</option>
+            }
+        </select>
+    </div>
+    <div class="col-12 col-sm-8 col-md-3 d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+        <a asp-action="Index" class="btn btn-outline-secondary">Làm mới</a>
+    </div>
+</form>
+
+<div class="table-responsive">
 <table class="table table-striped">
     <thead>
         <tr>
@@ -29,21 +51,33 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var department in Model)
+        @if (Model.Items.Count == 0)
         {
             <tr>
-                <td>@department.DepartmentCode</td>
-                <td>@department.Name</td>
-                <td>
-                    <button type="button" class="btn btn-sm btn-outline-primary" data-crud-modal
-                            data-url="@Url.Action("Edit", new { id = department.DepartmentCode })">Sửa</button>
-                    <button type="button" class="btn btn-sm btn-outline-danger" data-crud-modal
-                            data-url="@Url.Action("Delete", new { id = department.DepartmentCode })">Xóa</button>
-                </td>
+                <td colspan="3" class="text-center text-muted py-4">Không tìm thấy dữ liệu phù hợp</td>
             </tr>
+        }
+        else
+        {
+            @foreach (var department in Model.Items)
+            {
+                <tr>
+                    <td>@department.DepartmentCode</td>
+                    <td>@department.Name</td>
+                    <td>
+                        <button type="button" class="btn btn-sm btn-outline-primary" data-crud-modal
+                                data-url="@Url.Action("Edit", new { id = department.DepartmentCode })">Sửa</button>
+                        <button type="button" class="btn btn-sm btn-outline-danger" data-crud-modal
+                                data-url="@Url.Action("Delete", new { id = department.DepartmentCode })">Xóa</button>
+                    </td>
+                </tr>
+            }
         }
     </tbody>
 </table>
+</div>
+
+<partial name="_Pagination" model="Model.Pagination" />
 
 <div class="modal fade" id="crudModal" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog">

@@ -1,0 +1,31 @@
+@model DemoMVC.Models.Department
+
+<div class="modal-header">
+    <h5 class="modal-title">Xóa khoa</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Đóng"></button>
+</div>
+<form asp-action="Delete" asp-route-id="@Model.DepartmentCode" method="post" class="crud-modal-form" data-ajax-form>
+    <div class="modal-body">
+        @if (ViewData["HasStudents"] is true)
+        {
+            <p class="text-danger">Khoa này đang có sinh viên và không thể xóa.</p>
+        }
+        else
+        {
+            <p>Bạn có chắc chắn muốn xóa khoa này không?</p>
+        }
+        <dl class="row mb-0">
+            <dt class="col-sm-3">Mã khoa</dt>
+            <dd class="col-sm-9">@Model.DepartmentCode</dd>
+            <dt class="col-sm-3">Tên khoa</dt>
+            <dd class="col-sm-9">@Model.Name</dd>
+        </dl>
+    </div>
+    <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Đóng</button>
+        @if (ViewData["HasStudents"] is not true)
+        {
+            <button type="submit" class="btn btn-danger">Xóa</button>
+        }
+    </div>
+</form>
